@@ -1,13 +1,12 @@
 package com.zhh.redis.client;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
+import com.zhh.redis.command.RedisReply;
 import com.zhh.redis.command.RedisRequest;
 
 public class ClientHandler extends SimpleChannelHandler {
@@ -18,6 +17,8 @@ public class ClientHandler extends SimpleChannelHandler {
 		
 		
 		RedisConnection connection = (RedisConnection)ctx.getChannel().getAttachment();
+		RedisRequest request = connection.pollRequest();
+		request.getCallback().equals((RedisReply)e.getMessage());
         
 	}
 	
@@ -29,14 +30,9 @@ public class ClientHandler extends SimpleChannelHandler {
             	 RedisRequest request = (RedisRequest)e.getMessage();
                      Channel ch = ctx.getChannel();
                      RedisConnection redisConn = (RedisConnection)ch.getAttachment();
-                     if(redisConn == null){
-                         //    ch.setAttachment();
-                     }
-                   //  ctx.getChannel().write(request.getRequest());
-             }else{
-                     
-                     super.writeRequested(ctx, e);
-             }
+                    redisConn.addRequest(request);
+             }        
+             super.writeRequested(ctx, e);
      }
 	
 	

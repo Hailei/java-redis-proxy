@@ -37,6 +37,10 @@ public class RedisRequestDecoder extends ReplayingDecoder<RedisRequestDecoder.St
 		
 	}
 	
+	public  RedisRequestDecoder(){
+		super(State.READ_SKIP);
+	}
+	
 private static void skipChar(ChannelBuffer buffer){
 		
 		for(;;){

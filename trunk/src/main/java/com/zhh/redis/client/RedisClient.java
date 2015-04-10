@@ -41,11 +41,14 @@ public class RedisClient {
 			public ChannelPipeline getPipeline() throws Exception {
 				ChannelPipeline pipeline = Channels.pipeline();
 				pipeline.addLast("encoder", new RedisRequestEncoder());
+				pipeline.addLast("decoder", new RedisRequestDecoder());
+				pipeline.addLast("handler", new ClientHandler());
 				return pipeline;
 			}
 		});
 		Channel channel = bootstrap.connect(new InetSocketAddress(host,port)).awaitUninterruptibly().getChannel();
 		conn = new RedisConnection(channel);
+		channel.setAttachment(conn);
 		 
 	}
 }

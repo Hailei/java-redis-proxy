@@ -15,6 +15,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zhh.redis.client.RedisClient;
 import com.zhh.redis.protocol.RedisDecoderV2;
 import com.zhh.redis.protocol.RedisEncoder;
 
@@ -22,11 +23,10 @@ import com.zhh.redis.protocol.RedisEncoder;
 public class RedisServer {
 	static final Logger LOGGER = LoggerFactory.getLogger(RedisServer.class);
 	private ServerBootstrap bootstrap;
-	private String engine;
 	/**
 	 * @param port
 	 */
-	public RedisServer(String engine) {
+	public RedisServer() {
 
 		ChannelFactory factory = new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(),
@@ -34,14 +34,14 @@ public class RedisServer {
 
 		bootstrap = new ServerBootstrap(factory);
 		bootstrap.setOption("child.tcpNoDelay", true);
-		this.engine  = engine;
 		//bootstrap.setOption("child.keepAlive", true);
 	}
 
 	public void run(int port) {
 		//这两个handler不涉及共享变量，所以可以所有的channel都可以共享
 		final RedisEncoder redisEncoder = new RedisEncoder();
-		final ServerHandler serverHandler = new ServerHandler(engine);
+		RedisClient client = new RedisClient("127.0.0.1", 6379);
+		final ServerHandler serverHandler = new ServerHandler(client);
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 
 			public ChannelPipeline getPipeline() throws Exception {
@@ -72,12 +72,11 @@ public class RedisServer {
 
 	public static void main(String[] args) {
 		try {
-		    if(args.length < 2){
+		    if(args.length < 1){
 		        System.out.println("Usage: start.sh  engine port");
 		    }
-		    String engine = args[0];
-		    int port = Integer.parseInt(args[1]);
-			RedisServer server = new RedisServer(engine);
+		    int port = Integer.parseInt(args[0]);
+			RedisServer server = new RedisServer();
 	     	server.run(port);
 			LOGGER.info("store server is started,listening port:" + port);
 		} catch (Exception e) {
