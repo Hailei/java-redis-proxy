@@ -26,10 +26,17 @@ public class BulkReply extends CommonRedisReply {
 
 	public void doEncode(ChannelBuffer buffer) {
 		
-		buffer.writeBytes(ProtoUtil.convertIntToByteArray(value.length));
-		writeCRLF(buffer);
-		buffer.writeBytes(value);
-		writeCRLF(buffer);
+		if(length == -1){
+			buffer.writeBytes(ProtoUtil.convertIntToByteArray(length));
+			writeCRLF(buffer);
+		}else{
+			buffer.writeBytes(ProtoUtil.convertIntToByteArray(length));
+			writeCRLF(buffer);
+			if(value != null)
+			   buffer.writeBytes(value);
+			writeCRLF(buffer);
+		}
+	
 	}
 
 	

@@ -6,6 +6,7 @@ package com.zhh.redis.server;
 
 import java.io.IOException;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -14,6 +15,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zhh.redis.client.DefaultRedisConnectionCallback;
 import com.zhh.redis.client.RedisClient;
 import com.zhh.redis.command.ErrorReply;
 import com.zhh.redis.command.ProtoUtil;
@@ -34,6 +36,10 @@ public class ServerHandler extends SimpleChannelHandler {
 			throws Exception {
 		//命令分发
 		RedisRequest request = (RedisRequest)e.getMessage();
+		Channel ch = ctx.getChannel();
+		DefaultRedisConnectionCallback callback = new DefaultRedisConnectionCallback(
+				ch);
+		request.setCallback(callback);
         client.getConnection().write(request);
 		
 	}
